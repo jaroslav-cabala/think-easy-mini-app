@@ -1,17 +1,20 @@
 import "./App.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Provider } from "./components/ui/provider";
-import { AllPosts } from "./features/allPosts/AllPosts";
+import { PostsView } from "./features/postsView/AllPosts";
+import { AuthenticationProvider } from "./features/authentication/AuthenticationProvider";
 
 const queryClient = new QueryClient();
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Provider>
-        <AllPosts />
-      </Provider>
-    </QueryClientProvider>
+    <AuthenticationProvider>
+      <QueryClientProvider client={queryClient}>
+        <Provider>
+          <PostsView />
+        </Provider>
+      </QueryClientProvider>
+    </AuthenticationProvider>
   );
 }
 

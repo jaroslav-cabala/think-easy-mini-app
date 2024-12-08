@@ -8,16 +8,16 @@ import {
   DialogRoot,
   DialogTitle,
 } from "../../components/ui/dialog";
-import { PostResponse } from "../allPosts/useGetPosts";
+import { PostResponse } from "../postsView/useGetPosts";
 
 export type PostDetails = Pick<PostResponse, "title" | "content" | "authorId" | "createdAt">;
 
-type PostDetailsProps = {
+type PostDetailsViewProps = {
   post: PostDetails;
   onClose: () => void;
 };
 
-export function PostDetails({ post, onClose }: PostDetailsProps) {
+export function PostDetailsView({ post, onClose }: PostDetailsViewProps) {
   return (
     <DialogRoot placement="center" scrollBehavior="inside" defaultOpen onExitComplete={() => onClose()}>
       <DialogContent>
