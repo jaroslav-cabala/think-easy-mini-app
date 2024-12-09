@@ -1,27 +1,22 @@
-import { Button, Flex, Input, SimpleGrid } from "@chakra-ui/react";
-import { useDebounceState } from "../../components/hooks/useDebounceState";
+import { Box, Flex, Input, SimpleGrid } from "@chakra-ui/react";
+import { useDebounceState } from "../components/hooks/useDebounceState";
 import { useState } from "react";
 import { useGetPosts } from "./useGetPosts";
 import { Post, PostsGrid } from "./PostsGrid";
-import { LuFrown, LuLogIn } from "react-icons/lu";
-import { PostDetails, PostDetailsView } from "../postDetailsView/PostDetails";
-import { EmptyState } from "../../components/ui/empty-state";
-import { Skeleton } from "../../components/ui/skeleton";
-import { MdPostAdd } from "react-icons/md";
-import { CreatePost } from "../CreatePost";
+import { LuFrown } from "react-icons/lu";
+import { PostDetails, PostDetailsView } from "./PostDetails";
+import { EmptyState } from "../components/ui/empty-state";
+import { Skeleton } from "../components/ui/skeleton";
+import { CreatePost } from "./CreatePost";
+import { AuthenticationBar } from "./AuthenticationBar";
 
 export function PostsView() {
   const [searchValue, debouncedSearchValue, setSearchValue] = useDebounceState("");
   const [selectedPost, setSelectedPost] = useState<PostDetails | undefined>();
-  const [createPostFormOpen, setCreatePostFormOpen] = useState<boolean>(false);
   const { data: posts, isPending, isError } = useGetPosts();
 
   const onPostClick = (post: Post) => {
     setSelectedPost(post);
-  };
-
-  const onCreatePostClick = () => {
-    setCreatePostFormOpen(true);
   };
 
   // const t0 = performance.now();
@@ -33,22 +28,22 @@ export function PostsView() {
 
   return (
     <>
-      <Flex mb="20px" align="center" gap="5" wrap="wrap">
+      <Flex mb="20px" align="center" flexWrap={{ base: "wrap", lg: "nowrap" }} gap="5">
         <Input
+          order={{ base: 3, lg: 1 }}
           aria-label="search posts"
           value={searchValue}
           onChange={(e) => setSearchValue(e.currentTarget.value)}
           placeholder="Search posts..."
-          maxW="400px"
+          maxW={{ base: "full", lg: "500px" }}
+          size="lg"
         />
-        <Button colorPalette="green" variant="subtle" marginEnd="auto" onClick={onCreatePostClick}>
-          <MdPostAdd />
-          Create a post
-        </Button>
-        <Button colorPalette="red" variant="subtle">
-          <LuLogIn />
-          Login
-        </Button>
+        <Box marginEnd="auto" order={{ base: 1, lg: 2 }}>
+          <CreatePost />
+        </Box>
+        <Box order={{ base: 2, lg: 3 }}>
+          <AuthenticationBar />
+        </Box>
       </Flex>
       {filteredPosts?.length ? (
         <PostsGrid posts={filteredPosts} onPostClick={onPostClick} />
@@ -64,7 +59,6 @@ export function PostsView() {
         <EmptyState size="lg" title="Found 0 posts" description="Try adjusting your search." />
       )}
       {!!selectedPost && <PostDetailsView post={selectedPost} onClose={() => setSelectedPost(undefined)} />}
-      {createPostFormOpen && <CreatePost onClose={() => setCreatePostFormOpen(false)} />}
     </>
   );
 }

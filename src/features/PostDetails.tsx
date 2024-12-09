@@ -1,4 +1,3 @@
-import { Text } from "@chakra-ui/react";
 import {
   DialogBody,
   DialogCloseTrigger,
@@ -7,8 +6,9 @@ import {
   DialogHeader,
   DialogRoot,
   DialogTitle,
-} from "../../components/ui/dialog";
-import { PostResponse } from "../postsView/useGetPosts";
+} from "../components/ui/dialog";
+import { PostResponse } from "../apiTypes";
+import { PostDetailsFooter } from "./PostDetailsFooter";
 
 export type PostDetails = Pick<PostResponse, "title" | "content" | "authorId" | "createdAt">;
 
@@ -20,14 +20,13 @@ type PostDetailsViewProps = {
 export function PostDetailsView({ post, onClose }: PostDetailsViewProps) {
   return (
     <DialogRoot placement="center" scrollBehavior="inside" defaultOpen onExitComplete={() => onClose()}>
-      <DialogContent>
+      <DialogContent maxW="var(--chakra-sizes-4xl)">
         <DialogHeader>
           <DialogTitle>{post.title}</DialogTitle>
         </DialogHeader>
         <DialogBody>{post.content}</DialogBody>
         <DialogFooter>
-          <Text>Created at: {post.createdAt}</Text>
-          <Text>Author id: {post.authorId}</Text>
+          <PostDetailsFooter authorId={post.authorId} createdAt={post.createdAt} />
         </DialogFooter>
         <DialogCloseTrigger />
       </DialogContent>

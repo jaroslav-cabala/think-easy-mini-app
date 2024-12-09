@@ -1,16 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { postsEndpoint } from "../../config";
-import { QueryOptionsWithoutKeyAndFn } from "../../types";
-
-export type PostResponse = {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-  published: boolean;
-  title: string;
-  content: string;
-  authorId: string;
-};
+import { postsEndpoint } from "../config";
+import { QueryOptionsWithoutKeyAndFn } from "../utilTypes";
+import { PostResponse } from "../apiTypes";
 
 const fetchPosts = async (): Promise<PostResponse[]> => {
   const response = await fetch(postsEndpoint);
