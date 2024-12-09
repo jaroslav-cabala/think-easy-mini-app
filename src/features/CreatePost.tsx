@@ -18,6 +18,7 @@ import { Field } from "../components/ui/field";
 import { useCreatePost } from "./useCreatePost";
 import { useAuthenticationContext } from "./authentication/AuthenticationProvider";
 import { toast } from "react-toastify";
+import { AuthenticationError } from "./authentication/AuthenticationError";
 
 type CreatePostFormInputs = {
   title: string;
@@ -47,8 +48,12 @@ export function CreatePost() {
     toast.success("Post created!");
   }
 
-  function onCreatePostFailed() {
-    toast.error("Failed to create the post. Try again.");
+  function onCreatePostFailed(error: Error) {
+    if (error instanceof AuthenticationError) {
+      toast.error("Failed to create a post. Try to refresh the access token.");
+    } else {
+      toast.error("Failed to create a post for unknown reason.");
+    }
   }
 
   const onSubmit: SubmitHandler<CreatePostFormInputs> = (inputs) => {

@@ -21,3 +21,7 @@ export type LoginResponse = {
     role: string;
   };
 };
+
+export type RefreshAccessTokenResponse = {
+  access_token: string;
+};

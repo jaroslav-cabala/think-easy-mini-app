@@ -1,5 +1,10 @@
 import React, { createContext, useContext, useState } from "react";
 
+// TODO -> break this provider in 2 parts. One that provides methods to login and logout and one that
+// provides the user data + isAuthenticated property
+
+// TODO -> Persist a logged in user for a while so he does not have to log in every time page is reloaded
+
 export type User = {
   id: string;
   email: string;
@@ -9,9 +14,10 @@ export type User = {
   refreshToken: string;
 };
 
-interface AuthenticationContext {
+export interface AuthenticationContext {
   isAuthenticated: boolean;
   user?: User;
+  refreshAccessToken: (token: string) => void;
   login: (user: User) => void;
   logout: () => void;
 }
@@ -42,8 +48,12 @@ export const AuthenticationProvider = ({ children }: React.PropsWithChildren) =>
     setUser(undefined);
   };
 
+  const refreshAccessToken = (token: string) => {
+    setUser(user ? { ...user, accessToken: token } : undefined);
+  };
+
   return (
-    <AuthenticationContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthenticationContext.Provider value={{ isAuthenticated, user, refreshAccessToken, login, logout }}>
       {children}
     </AuthenticationContext.Provider>
   );

@@ -3,6 +3,7 @@ import { postsEndpoint } from "../config";
 import { MutationOptionsWithoutKeyAndFn } from "../utilTypes";
 import { PostResponse } from "../apiTypes";
 import { useAuthenticationContext } from "./authentication/AuthenticationProvider";
+import { AuthenticationError } from "./authentication/AuthenticationError";
 
 type CreatePostInput = {
   title: string;
@@ -15,12 +16,15 @@ const createPost = async ({ accessToken, title, content }: CreatePostInput): Pro
     method: "POST",
     body: JSON.stringify({ title, content }),
     headers: {
-      "Content-Type": "application/son",
+      "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
     },
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      throw new AuthenticationError("Unauthorized.");
+    }
     throw new Error("Failed to create a post!");
   }
 

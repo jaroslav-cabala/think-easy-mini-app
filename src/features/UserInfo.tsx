@@ -1,12 +1,33 @@
 import { HStack, IconButton, Stack, Text } from "@chakra-ui/react";
-import { useAuthenticationContext, User } from "./authentication/AuthenticationProvider";
+import { AuthenticationContext, User } from "./authentication/AuthenticationProvider";
 import { Avatar } from "../components/ui/avatar";
 import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from "../components/ui/menu";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { LuRefreshCw, LuLogOut } from "react-icons/lu";
+import { useRefreshToken } from "./useRefreshAccessToken";
+import { RefreshAccessTokenResponse } from "../apiTypes";
+import { toast } from "react-toastify";
 
-export function UserInfo({ user }: { user: User }) {
-  const { logout } = useAuthenticationContext();
+type UserInfoProps = {
+  user: User;
+  refreshAccessToken: AuthenticationContext["refreshAccessToken"];
+  logout: AuthenticationContext["logout"];
+};
+
+export function UserInfo({ user, refreshAccessToken, logout }: UserInfoProps) {
+  const refreshTokenMutation = useRefreshToken({
+    onSuccess: onRefreshTokenSuccess,
+    onError: onRefreshTokenFailed,
+  });
+
+  function onRefreshTokenSuccess(data: RefreshAccessTokenResponse) {
+    refreshAccessToken(data.access_token);
+    toast.success("Access token refreshed!");
+  }
+
+  function onRefreshTokenFailed() {
+    toast.error("Failed to refresh the access token.");
+  }
 
   return (
     <HStack key={user.id} gap="3">
@@ -26,7 +47,11 @@ export function UserInfo({ user }: { user: User }) {
           </IconButton>
         </MenuTrigger>
         <MenuContent>
-          <MenuItem value="refresh-access-token" cursor="pointer">
+          <MenuItem
+            value="refresh-access-token"
+            cursor="pointer"
+            onClick={() => refreshTokenMutation.mutate({})}
+          >
             <LuRefreshCw />
             Refresh access token
           </MenuItem>
