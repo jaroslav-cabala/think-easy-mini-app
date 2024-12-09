@@ -1,5 +1,4 @@
-import { Box, Flex, Input, SimpleGrid } from "@chakra-ui/react";
-import { useDebounceState } from "../components/hooks/useDebounceState";
+import { AbsoluteCenter, Icon, SimpleGrid } from "@chakra-ui/react";
 import { useState } from "react";
 import { useGetPosts } from "./useGetPosts";
 import { Post, PostsGrid } from "./PostsGrid";
@@ -7,54 +6,36 @@ import { LuFrown } from "react-icons/lu";
 import { PostDetails, PostDetailsView } from "./PostDetails";
 import { EmptyState } from "../components/ui/empty-state";
 import { Skeleton } from "../components/ui/skeleton";
-import { CreatePost } from "./CreatePost";
-import { AuthenticationBar } from "./AuthenticationBar";
+import { useDebounceState } from "../components/hooks/useDebounceState";
+import { ActionBar } from "./ActionBar";
 
 export function PostsView() {
-  const [searchValue, debouncedSearchValue, setSearchValue] = useDebounceState("");
   const [selectedPost, setSelectedPost] = useState<PostDetails | undefined>();
+  const [searchValue, debouncedSearchValue, setSearchValue] = useDebounceState("");
   const { data: posts, isPending, isError } = useGetPosts();
+
+  if (isError && !posts) {
+    return <ErrorMessage />;
+  }
 
   const onPostClick = (post: Post) => {
     setSelectedPost(post);
   };
 
-  // const t0 = performance.now();
+  // searching through lots of posts should ideally be done on backend.
+  // This below is a blocking code which can lead to a laggy ux.
+  // If I had time I would think of something to make the filtering asynchronous with Promises/SetTimeout :)
   const filteredPosts = debouncedSearchValue
     ? posts?.filter((post) => post.title.includes(debouncedSearchValue) || post.content.includes(searchValue))
     : posts;
-  // const t1 = performance.now();
-  // console.log(`filtering took ${t1 - t0} milliseconds. Filter by ${debouncedSearchValue}`);
 
   return (
     <>
-      <Flex mb="20px" align="center" flexWrap={{ base: "wrap", lg: "nowrap" }} gap="5">
-        <Input
-          order={{ base: 3, lg: 1 }}
-          aria-label="search posts"
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.currentTarget.value)}
-          placeholder="Search posts..."
-          maxW={{ base: "full", lg: "500px" }}
-          size="lg"
-        />
-        <Box marginEnd="auto" order={{ base: 1, lg: 2 }}>
-          <CreatePost />
-        </Box>
-        <Box order={{ base: 2, lg: 3 }}>
-          <AuthenticationBar />
-        </Box>
-      </Flex>
+      <ActionBar searchValue={searchValue} setSearchValue={setSearchValue} />
       {filteredPosts?.length ? (
         <PostsGrid posts={filteredPosts} onPostClick={onPostClick} />
-      ) : isError ? (
-        <ErrorMessage />
       ) : isPending ? (
-        <SimpleGrid columns={[1, 1, 2, 3, 3, 4]} gap="5">
-          {[...Array(12)].map(() => (
-            <Skeleton h="200px" />
-          ))}
-        </SimpleGrid>
+        <LoadingIndicator />
       ) : (
         <EmptyState size="lg" title="Found 0 posts" description="Try adjusting your search." />
       )}
@@ -65,9 +46,21 @@ export function PostsView() {
 
 const ErrorMessage = () => {
   return (
-    <div className="text-2xl center-items">
-      <LuFrown className="mr-2" />
+    <AbsoluteCenter axis="both">
+      <Icon mr="2">
+        <LuFrown />
+      </Icon>
       Ooops, something went wrong. Try reloading the page.
-    </div>
+    </AbsoluteCenter>
+  );
+};
+
+const LoadingIndicator = () => {
+  return (
+    <SimpleGrid columns={[1, 1, 2, 3, 3, 4]} gap="5">
+      {[...Array(12)].map(() => (
+        <Skeleton h="200px" />
+      ))}
+    </SimpleGrid>
   );
 };
