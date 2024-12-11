@@ -1,5 +1,5 @@
 import { AbsoluteCenter, Icon, SimpleGrid } from "@chakra-ui/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useGetPosts } from "./useGetPosts";
 import { Post, PostsGrid } from "./PostsGrid";
 import { LuFrown } from "react-icons/lu";
@@ -8,11 +8,20 @@ import { EmptyState } from "../components/ui/empty-state";
 import { Skeleton } from "../components/ui/skeleton";
 import { useDebounceState } from "../components/hooks/useDebounceState";
 import { ActionBar } from "./ActionBar";
+import { PostResponse } from "../apiTypes";
 
 export function PostsView() {
   const [selectedPost, setSelectedPost] = useState<PostDetails | undefined>();
   const [searchValue, debouncedSearchValue, setSearchValue] = useDebounceState("");
   const { data: posts, isPending, isError } = useGetPosts();
+
+  // searching through lots of posts should ideally be done on backend.
+  // This below is a blocking code which can lead to a laggy ux.
+  // If I had time I would think of something to make the filtering asynchronous with Promises/SetTimeout :)
+  const filteredPosts = useMemo(
+    () => filterPosts(debouncedSearchValue, posts),
+    [debouncedSearchValue, posts]
+  );
 
   if (isError && !posts) {
     return <ErrorMessage />;
@@ -21,13 +30,6 @@ export function PostsView() {
   const onPostClick = (post: Post) => {
     setSelectedPost(post);
   };
-
-  // searching through lots of posts should ideally be done on backend.
-  // This below is a blocking code which can lead to a laggy ux.
-  // If I had time I would think of something to make the filtering asynchronous with Promises/SetTimeout :)
-  const filteredPosts = debouncedSearchValue
-    ? posts?.filter((post) => post.title.includes(debouncedSearchValue) || post.content.includes(searchValue))
-    : posts;
 
   return (
     <>
@@ -42,6 +44,14 @@ export function PostsView() {
       {!!selectedPost && <PostDetailsView post={selectedPost} onClose={() => setSelectedPost(undefined)} />}
     </>
   );
+}
+
+function filterPosts(debouncedSearchValue: string, posts?: PostResponse[]) {
+  return debouncedSearchValue
+    ? posts?.filter(
+        (post) => post.title.includes(debouncedSearchValue) || post.content.includes(debouncedSearchValue)
+      )
+    : posts;
 }
 
 const ErrorMessage = () => {
